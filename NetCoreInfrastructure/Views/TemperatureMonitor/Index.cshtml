@@ -1,0 +1,81 @@
+﻿@section csses
+    {
+}
+<div>
+    <el-row :gutter="12">
+        <el-col :span="12" v-for="(o, index) in 20">
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>烤箱</span>
+                </div>
+                <div id="myChart" style="width:500px;height:300px;float:left;" ref="chart"></div>
+            </el-card>
+        </el-col>
+        @*<el-col :span="12">
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>烤箱2</span>
+
+                </div>
+                <div>
+                    <div id="myChart1" style="width:500px;height:300px;float:left;" ref="chart"></div>
+                </div>
+            </el-card>
+         </el-col>*@
+    </el-row>
+</div>
+    
+@section Scripts
+{
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                echartdata: {
+                    'tag': ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'],
+                    'P1': [220, 222, 224, 223, 220, 223]
+                }
+            }
+        },
+        mounted() {
+            this.drawLine('myChart');
+            this.drawLine('myChart1');
+        },
+        methods: {
+            //echarts绘制函数
+            drawLine(name) {
+                // 基于准备好的dom，初始化echarts实例
+                let myChart = echarts.init(document.getElementById(name), 'walden')
+                // 绘制图表
+                myChart.setOption({
+                    tooltip: {},
+                    xAxis: {
+                        data: this.echartdata.tag
+                    },
+                    yAxis: {
+                    },
+
+                    series: [{
+                        name: 'P1',
+                        type: 'bar',
+                        data: this.echartdata.P1,
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true, //开启显示	
+                                    position: 'top', //在上方显示
+                                    textStyle: {
+                                        //数值样式										
+                                        color: 'black', fontSize: 16
+                                    }
+                                }
+                            }
+                        }
+                    }]
+                });
+            }
+        }
+    })
+    </script>
+}

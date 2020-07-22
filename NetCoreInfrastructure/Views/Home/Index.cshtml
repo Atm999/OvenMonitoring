@@ -1,0 +1,450 @@
+﻿@using Newtonsoft.Json
+@using Microsoft.AspNetCore.Mvc.Localization
+@model Entity.UserInfo
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = "Home";
+}
+
+@section csses
+    {
+    <style>
+    html {
+        height: 100%;
+    }
+
+    body {
+        margin: 0px;
+        height: 100%;
+    }
+
+    .el-card {
+        height: 100%
+    }
+
+    .el-card__body {
+        height: 100%;
+        padding: 0px;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+    .el-table th div {
+        height: 25px;
+        line-height: 0px;
+    }
+
+    .el-button--mini.is-circle {
+        padding: 5px;
+    }
+
+    .welcome{
+         background-image:url('@Url.Content("~/img/MES_und_I40.jpg")');
+        background-size:cover;
+    }
+    .el-tabs__content
+    {
+        position: absolute;
+        top:39px;
+    bottom:0;
+    left:0;
+    right: 0;
+    }
+    .el-tabs--border-card>.el-tabs__content
+    {
+        padding: 0px;
+    }
+
+        .el-menu
+        {
+        background-color: #f5f7fa
+        }
+
+        .el-scrollbar__wrap{
+        overflow:hidden;
+        }
+        .login-form {
+            width: 350px;
+            margin: 160px auto; /* 上下间距160px，左右自动居中*/
+            background-color: rgb(255, 255, 255, 0.8); /* 透明背景色 */
+            padding: 30px;
+            border-radius: 20px; /* 圆角 */
+        }
+
+        /* 背景 */
+        .login-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url("../../assets/login.png");
+        }
+
+        /* 标题 */
+        .login-title {
+            color: #303133;
+            text-align: center;
+        }
+    </style>
+}
+
+@if (Model == null)
+{
+    <div class="login-container">
+        <el-form ref="form" :rules="rules" :model="form" label-width="80px" class="login-form">
+            <h2 class="login-title">烤箱监控系统</h2>
+            <el-alert title="账号密码错误" v-show="success" type="error" show-icon></el-alert>
+            <el-form-item label="用户名" prop="username">
+                <el-input v-model="form.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+                <el-input v-model="form.password"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" v-on:click="submitForm(form)">登录</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
+}
+else
+{
+    <div style="width: 100%;height: 100%;flex-direction: column;display: flex;align-items: stretch">
+        <div style="width: 100%;background-color: #EAEAEA;display: flex;justify-content: center;align-items: center;height: 50px">
+            @*<img src="/img/scanfil-logo.png" style="height: 30px;position: absolute;left: 10px;top: 10px" />*@
+            <label style="font-size: 30px;color: #0061AF;font-weight: 800">@Localizer["烤箱温度监控系统"]</label>
+            <div style="position: absolute;top: 5px;right: 20px">
+                <el-dropdown v-on:command="CommandHandler">
+                    <span class="el-dropdown-link">
+                        @if (string.IsNullOrEmpty(ViewData["Avatar"]?.ToString()))
+                        {
+                            <el-avatar src="/img/user.png"></el-avatar>
+                        }
+                        else
+                        {
+                            <el-avatar src="@ViewData["Avatar"]"></el-avatar>
+                        }
+
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item disabled>@Model.user_name</el-dropdown-item>
+                        <el-dropdown-item command="Logout">@Localizer["登出"]</el-dropdown-item>
+                        <el-dropdown-item command="ChangePassword">@Localizer["更改密码"]</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+            </div>
+        </div>
+        <el-button style="position: absolute;top: 50%;left:5px;z-index:99999" icon="el-icon-right" circle size="mini" type="primary" v-on:click="Hidden" v-if="HiddenSign"></el-button>
+        <div style="width: 100%;position: absolute;top:50px;left: 0px;bottom: 0px;display: flex;flex-direction: row;">
+            <div style="width: 200px;height: 100%;background-color: #f5f7fa" v-if="!HiddenSign">
+                <el-scrollbar style="height:100%" :is-horizontal="false">
+                    <el-menu style="height: 100%"
+                             v-on:select="SelectMenuItem"
+                             class="el-menu-vertical-demo">
+                            <el-submenu index="1">
+                                <template slot="title">
+                                    <i class="el-icon-setting"></i>
+                                    <span>@Localizer["烤箱参数设定"]</span>
+                                </template>
+                                <el-menu-item v-for="item in SetMenuItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                            </el-submenu>
+                            <el-submenu index="2">
+                                <template slot="title">
+                                    <i class="el-icon-tickets"></i>
+                                    <span>@Localizer["烤箱数据"]</span>
+                                </template>
+                                <el-menu-item v-for="item in WorkItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                            </el-submenu>
+                            <el-submenu index="3">
+                                <template slot="title">
+                                    <i class="el-icon-tickets"></i>
+                                    <span>@Localizer["用户管理"]</span>
+                                </template>
+                                <el-menu-item v-for="item in UserItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                            </el-submenu>
+                    </el-menu>
+                </el-scrollbar>
+                <el-button style="position: absolute;top: 50%;left:170px" icon="el-icon-back" circle size="mini" type="primary" v-on:click="Hidden"></el-button>
+            </div>
+
+            <div style="flex-grow: 1;height: 100%">
+                <el-tabs type="border-card" v-model="editableTabsValue" v-on:edit="handleTabsEdit" style="height: 100%;width: 100%;border: none;display: flex;flex-direction: column;position:relative;">
+                    <el-tab-pane label="主页" :closable="false" style="height: 100%">
+                        <div style="width: 100%;height: 100%;" class="welcome"></div>
+                    </el-tab-pane>
+                    <el-tab-pane v-for="item in Tabs" :key="item.name" :name="item.name" :label="item.title" closable style="height: 100%">
+                        <iframe style="width: 100%;height: 100%;border: none" :src="item.url"></iframe>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+        </div>
+    </div>
+}
+@* 弹窗 *@
+<el-dialog title="修改密码"
+           :visible.sync="dialogVisible"
+           width="30%"
+           :before-close="handleClose">
+    <el-form ref="form" :model="form" label-width="80px">
+        <el-form-item label="旧密码">
+            <el-input v-model="form.pre_password"></el-input>
+        </el-form-item>
+        <el-form-item label="新密码">
+            <el-input v-model="form.new_password"></el-input>
+        </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+        <el-button v-on:click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary"  v-on:click="changePasswordForm(form)">确 定</el-button>
+    </span>
+</el-dialog>
+
+@section Scripts
+    {
+    <script>
+        var roles = "设备管理";
+        var vm = new Vue({
+            el: "#app",
+            data: function() {
+                return {
+                    Tabs: [
+                    ],
+                    Roles: ["设备管理", "用户管理"],
+                    HiddenSign: roles.length===0,
+                    editableTabsValue: null,
+                    ChangePwdItem:{
+                        url: '@ViewData["UserManagerUrl"]home/changePwd/?Culture=en-US',
+                        title: "@Localizer["Change Password"]",
+                        name: "10"
+                    },
+                    SetMenuItems: [
+                        {
+                            url: '@ViewData["UserManagerUrl"]?Culture=en-US',
+                            title: "@Localizer["用户管理"]",
+                            role: "User Management",
+                            name: "20"
+                        },
+                        {
+                            url: "/Config/DistrictInfo",
+                            title: "区域信息",
+                            role: "设备管理",
+                            name: "1"
+                        },
+                        {
+                            url: "/Config/Position",
+                            title: "位置信息",
+                            role: "设备管理",
+                            name: "2"
+                        },
+                        {
+                            url: "/Config/Shelf",
+                            title: "货架信息",
+                            role: "设备管理",
+                            name: "3"
+                        },
+                        {
+                            url: "/Config/Locker",
+                            title: "储柜信息",
+                            role: "设备管理",
+                            name: "4"
+                        },
+                        {
+                            url: "/Config/ErrorCode",
+                            title: "不良代码",
+                            role: "设备管理",
+                            name: "5"
+                        },
+                        {
+                            url: "/Config/ErrorReason",
+                            title: "不良原因",
+                            role: "设备管理",
+                            name: "6"
+                        },
+                        {
+                            url: "/Config/Status",
+                            title: "设备状态",
+                            role: "设备管理",
+                            name: "7"
+                        },
+                        {
+                            url: "/Config/Style",
+                            title: "设备类型",
+                            role: "设备管理",
+                            name: "8"
+                        },
+                        {
+                            url: "/Config/Machine",
+                            title: "设备信息",
+                            role: "设备管理",
+                            name: "9"
+                        },
+                    ],
+                    WorkItems: [
+                        {
+                            url: "/TemperatureHistory/Index",
+                            title: "历史温度曲线",
+                            role: "设备管理",
+                            name: "30"
+                        },
+                        {
+                            url: "/TemperatureMonitor/Index",
+                            title: "实时温度曲线",
+                            role: "设备管理",
+                            name: "31"
+                        },
+                        {
+                            url: "/TemperatureAlarm/Index",
+                            title: "警报信息",
+                            role: "设备管理",
+                            name: "32"
+                        },
+                    ],
+                    UserItems: [
+                        {
+                            url: "/User/Index",
+                            title: "账号管理",
+                            role: "设备管理",
+                            name: "33"
+                        }
+                    ],
+                    success: false,
+                    form: {
+                        username: "",
+                        password: "",
+
+                    },
+                    rules: {
+                        username: [
+                            { required: true, message: "用户名不能为空", trigger: 'blur' },
+                            { min: 3, max: 10, message: "用户名3-5位", trigger: 'blur' }
+                        ],
+                        password: [
+                            { required: true, message: "密码不能为空", trigger: 'blur' },
+                            { min: 3, max: 10, message: "密码3-5位", trigger: 'blur' }
+                        ]
+                    },
+                    dialogVisible: false
+                };
+            },
+            methods: {
+                SelectMenuItem: function(index) {
+                    //打开标签页
+                    //获得对应的菜单
+                    var item = _.find(this.SetMenuItems, item => { return item.url === index });
+                    if (!item) {
+                        item = _.find(this.UserItems, item => { return item.url === index });
+                    }
+                    if (!item) {
+                        item = _.find(this.WorkItems, item => { return item.url === index });
+                    }
+                    if (item) {
+                        this.handleTabsEdit(item, "add");
+                    }
+
+                },
+                handleTabsEdit(targetName, action) {
+                    if (action === 'add') {
+                        //判定是否已经存在
+                        var index = _.findIndex(this.Tabs, item => { return item.url === targetName.url; });
+                        if (index < 0) {
+                            //添加
+                            this.Tabs.push(targetName);
+                            this.editableTabsValue = targetName.name;
+                        }
+                        this.editableTabsValue = targetName.name;
+                    }
+                    if (action === 'remove') {
+                        //查找
+                        var index = _.findIndex(this.Tabs,
+                            x => {
+                                return x.name === targetName;
+                            });
+                        if (index >= 0) {
+
+                            if (this.Tabs[index].name === this.editableTabsValue) {
+                                //关闭是当前活动的
+                                if (index >= 1) {
+                                    this.editableTabsValue = this.Tabs[index - 1].name;
+                                } else {
+                                    this.editableTabsValue = "0";
+                                }
+                            }
+                            this.Tabs.splice(index, 1);
+                        }
+                    }
+                },
+                Hidden: function() {
+                    this.HiddenSign = !this.HiddenSign;
+                },
+                CheckRole: function(roles, role) {
+                    let index = _.findIndex(roles,
+                        o => {
+                            return o === "Administrators" || _.startsWith(o, role);
+                        });
+                    return index >= 0;
+                },
+                CommandHandler: function(command) {
+                    if (command === 'Logout') {
+                        axios.get("/User/LogOut").then(re => {
+                            if (re.data == true) {
+                                window.location.reload();
+                            }
+                        }).catch(error => {
+                            this.$notify.error({
+                                title: "登出失败",
+                                message: error
+                            });
+                        });
+                    } else if (command === "ChangePassword") {
+                        this.dialogVisible = true
+                        //this.handleTabsEdit(this.ChangePwdItem, "add");
+                    }
+                },
+                //登录信息提交
+                submitForm: function (form) {
+                    axios.get("/Home/Check?username=" + form.username + "&password=" + form.password).then(fb => {
+                        if (fb.data == "Success") {
+                            window.location.reload();
+                            return;
+                        }
+                        else {
+                            this.$notify.info({
+                                title: "信息",
+                                message: "登录失败"
+                            })
+                        }
+                        window.location.reload();
+                    }).catch(error => {
+                        this.$notify.error({
+                            title: "登录失败",
+                            message: "请检查账号密码"
+                        });
+                    });
+                },
+                //修改密码
+                changePasswordForm: function (form) {
+                    axios.get("/User/UpdatePassword?pre_password=" + form.pre_password + "&new_password=" + form.new_password).then(fb => {
+                        if (fb.data == true) {
+                            window.location.reload();
+                            this.dialogVisible = false;
+                            return;
+                        }
+                        else {
+                            this.$notify.info({
+                                title: "信息",
+                                message: "登录失败"
+                            })
+                        }
+                        window.location.reload();
+                    }).catch(error => {
+                        this.$notify.error({
+                            title: "登录失败",
+                            message: "请检查账号密码"
+                        });
+                    });
+                }
+            }
+        });
+    </script>
+}

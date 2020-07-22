@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Authorize</name>
+    </assembly>
+    <members>
+        <member name="M:Authorize.Authorize.AuthenticationExtention.InjectAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            注入jwt授权
+            </summary>
+            <param name="services"></param>
+            <param name="Configuration"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Authorize.Controllers.JWTController.Login(System.String,System.String)">
+            <summary>
+            登录并获取token
+            </summary>
+            <param name="user_name"></param>
+            <param name="password"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Authorize.Controllers.JWTController.GetUser(System.String)">
+            <summary>
+            获取用户列表
+            </summary>
+            <param name="token">令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Authorize.Controllers.JWTController.CreateUser(System.String,System.String,System.String,System.String)">
+            <summary>
+            创建用户
+            </summary>
+            <param name="token">token</param>
+            <param name="user_name">用户名</param>
+            <param name="password">密码</param>
+            <param name="role">权限 admin guest</param>
+            <returns></returns>
+        </member>
+        <member name="M:Authorize.Controllers.JWTController.DeleteUser(System.String,System.String)">
+            <summary>
+            删除账号
+            </summary>
+            <param name="token"></param>
+            <param name="user_name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Authorize.Controllers.JWTController.UpdatePassword(System.String,System.String,System.String)">
+            <summary>
+            更新密码
+            </summary>
+            <param name="token"></param>
+            <param name="pre_password"></param>
+            <param name="new_password"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Authorize.Entity.JwtSetting.Issuer">
+            <summary>
+            颁发者
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.JwtSetting.Audience">
+            <summary>
+            接收者
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.JwtSetting.SecurityKey">
+            <summary>
+            令牌密码
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.JwtSetting.ExpireHours">
+            <summary>
+             过期时间(小时)
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.JwtSetting.Credentials">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.UserToken.Role">
+            <summary>
+            用户权限角色
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.UserToken.expire">
+            <summary>
+            有效时间
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.UserToken.Token">
+            <summary>
+            Token
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.UserToken.AuthorizeType">
+            <summary>
+            授权类型
+            </summary>
+        </member>
+        <member name="P:Authorize.Entity.UserToken.ErrorMessage">
+            <summary>
+            错误信息
+            </summary>
+        </member>
+    </members>
+</doc>
