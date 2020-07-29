@@ -26,12 +26,11 @@
         
     }
 </el-container>
-<el-table :data="tableData" border
-          stripe
-          style="width: 60%;margin-left:100px">
+<el-table :data="tableData" 
+          style="width: 100%;">
     <el-table-column prop="user_name"
                      label="用户名"
-                     width="180">
+                     width="560">
     </el-table-column>
     <el-table-column prop="role"
                      label="权限"
@@ -47,7 +46,7 @@
         @if (Model.Role == "admin")
         {
             <template slot-scope="scope">
-                <el-button type="danger" v-on:click="DeleteUser(scope.row.user_name)">删除</el-button>
+                <el-button type="danger" style="float:left" v-on:click="DeleteUser(scope.row.user_name)">删除</el-button>
             </template>
         }
     </el-table-column>
@@ -121,38 +120,42 @@
                 DeleteUser(user_name) {
                     axios.get("/User/DeleteUser?username=" + user_name).then(re => {
                         if (re.data == true) {
-                            window.location.reload();
+                            this.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            })
+                            for (var i = 0; i <= this.tableData.length; i++) {
+                                if (this.tableData[i].user_name == user_name) {
+                                    this.tableData.splice(i, 1);
+                                    break;
+                                }
+                            }
+                            //window.location.reload();
                         }
                         else {
-                            this.$notify.error({
-                                title: "删除失败",
-                                message: error
-                            });
+                            this.$message.error('删除失败');
                         }
                     }).catch(error => {
-                        this.$notify.error({
-                            title: "删除失败",
-                            message: error
-                        });
+                        this.$message.error('删除失败');
                     });
                 },
-                //请求查询的时间段
+                //新增账号
                 AddUser(form) {
                     axios.get("/User/CreateUser?username=" + form.user_name + "&password=" + form.password + "&role=" + form.role).then(re => {
                         if (re.data == true) {
-                            window.location.reload();
+                            this.$message({
+                                message: '添加成功',
+                                type: 'success'
+                            })
+                            this.tableData.push(form);
+                            this.dialogVisible = false;
+                            //window.location.reload();
                         }
                         else {
-                            this.$notify.error({
-                                title: "添加失败",
-                                message: error
-                            });
+                            this.$message.error('添加失败');
                         }
                     }).catch(error => {
-                        this.$notify.error({
-                            title: "添加失败",
-                            message: error
-                        });
+                        this.$message.error('添加失败');
                     });
                 },
             }

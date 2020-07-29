@@ -1,29 +1,30 @@
 ﻿@section csses
     {
 }
-
-<div>选择烤箱
-    <el-select v-model="oven" filterable placeholder="请选择">
-    <el-option
-      v-for="item in ovens"
-      :key="item.key"
-      :label="item.label"
-      :value="item.value">
-    </el-option>
-  </el-select>
-</div>
-<div class="block" id="datepicker">
-    <span class="demonstration">选择时间段</span>
-    <el-date-picker v-model="datevalue"  
-                    type="datetimerange"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期">
-    </el-date-picker>
-      <el-button type="primary" v-on:click ="Query" >查询</el-button>
-</div>
-
-<div id="myChart" style="width:1000px;height:600px" ref="chart"></div>
+    <div>
+        <div style="float:left">
+            选择烤箱
+            <el-select v-model="oven_id" placeholder="请选择">
+                <el-option v-for="item in ovens"
+                           :key="item.oven_name"
+                           :label="item.oven_name"
+                           :value="item.id">
+                </el-option>
+            </el-select>
+        </div>
+        <div class="block" id="datepicker" style="float:left">
+            <span class="demonstration">选择时间段</span>
+            <el-date-picker v-model="datevalue"
+                            type="datetimerange"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期">
+            </el-date-picker>
+            <el-button type="primary" v-on:click="Query">查询</el-button>
+        </div>
+    </div>
+    <br><br>
+<div id="myChart" style="width:1200px;height:550px" ref="chart"></div>
 
 @section Scripts
     {
@@ -34,32 +35,48 @@
                 return {
                     datevalue: [new Date(2000, 10, 10, 10, 10), new Date(2000, 10, 11, 10, 10)],
                     echartdata: {
-                        'timestamp': [1, 2, 3, 4, 5, 6],
-                        'P1': [15, 20, 36, 10, 10, 100],
-                        'P2': [5, 120, 36, 10, 10, 100],
-                        'P3': [5, 20, 136, 10, 10, 100],
-                        'P4': [5, 20, 36, 110, 10, 100],
-                        'P5': [5, 20, 36, 110, 10, 100],
-                        'P6': [5, 20, 36, 10, 110, 100],
+                        //'timestamp': [1, 2, 3, 4, 5, 6],
+                        //'P1': [15, 20, 36, 10, 10, 100],
+                        //'P2': [5, 120, 36, 10, 10, 100],
+                        //'P3': [5, 20, 136, 10, 10, 100],
+                        //'P4': [5, 20, 36, 110, 10, 100],
+                        //'P5': [5, 20, 36, 110, 10, 100],
+                        //'P6': [5, 20, 36, 10, 110, 100],
+                        'timestamp': [],
+                        'P1': [],
+                        'P2': [],
+                        'P3': [],
+                        'P4': [],
+                        'P5': [],
+                        'P6': [],
                     },
-                        ovens: [{
-                            value: '',
-                            label: ''
-                        }],
-                        oven: ''
-                    
+                    ovens: [{
+                        value: '',
+                        label: ''
+                    }],
+                    oven_id: 0  ,
+                    myChart
                 }
             },
             mounted() {
+                //this.drawLine();
+                this.GetOvenInfo();
                 this.drawLine();
             },
             methods: {
+                GetOvenInfo() {
+                    axios.get("/OvenSystemConfig/GetOvenInfo").then(re => {
+                        this.ovens = re.data;
+                    }).catch(error => {
+                        this.$message.error('获取失败');
+                    });
+                },
                 //echarts绘制函数
                 drawLine() {
                     // 基于准备好的dom，初始化echarts实例
-                    let myChart = echarts.init(document.getElementById('myChart'), 'walden')
+                    this.myChart = echarts.init(document.getElementById('myChart'), 'walden')
                     // 绘制图表
-                    myChart.setOption({
+                    this.myChart.setOption({
                         title: { x: 'middle', text: '温度监控' },
                         tooltip: {},
                         legend: {
@@ -110,46 +127,63 @@
                 //请求查询的时间段
                 Query()
                 {
-                    axios.get("/TemperatureMonitor/Check?start=" + this.datevalue[0] + "&end=" + this.datevalue[1]).then(re => {
-                    if (re.data.status == 200) {
-                        this.$notify.success({ title: "成功", message: "查询成功" });
-                    }
+                    axios.get("/TemperatureHistory/GetHistoryData?oven_id=" + this.oven_id + "&start_time=" + this.datevalue[0].toLocaleDateString() + "&end_time=" + this.datevalue[1].toLocaleDateString()).then(re => {
+                        if (re.data.length > 0) {
+                            this.$message({
+                                message: '查询成功',
+                                type: 'success'
+                            });
+                            var ts = [];
+                            var p1 = [];
+                            var p2 = [];
+                            var p3 = [];
+                            var p4 = [];
+                            var p5 = [];
+                            var p6 = [];
+                            for (var i = 0; i < re.data.length; i++) {
+                                //this.echartdata.timestamp.push(re.data[i].insert_time);
+                                //this.echartdata.timestamp.push(i);
+                                //this.echartdata.P1.push(re.data[i].point1);
+                                //this.echartdata.P2.push(re.data[i].point2);
+                                //this.echartdata.P3.push(re.data[i].point3);
+                                //this.echartdata.P4.push(re.data[i].point4);
+                                //this.echartdata.P5.push(re.data[i].point5);
+                                //this.echartdata.P6.push(re.data[i].point6);
+                                ts.push(re.data[i].insert_time);
+                                p1.push(re.data[i].point1)
+                                p2.push(re.data[i].point2)
+                                p3.push(re.data[i].point3)
+                                p4.push(re.data[i].point4)
+                                p5.push(re.data[i].point5)
+                                p6.push(re.data[i].point6)
+                            }
+                            this.echartdata.timestamp = ts;
+                            this.echartdata.P1 = p1;
+                            this.echartdata.P2 = p2;
+                            this.echartdata.P3 = p3;
+                            this.echartdata.P4 = p4;
+                            this.echartdata.P5 = p5;
+                            this.echartdata.P6 = p6;
+                            //if (this.myChart != null)
+                            //    this.myChart.refresh();
+                            //else
+                            //    this.drawLine();
+                            //var option = this.myChart.getOption();
+                            //option.series[0].data = data;
+                            //myChart.setOption(option);   
+                            //需要先销毁 才可以再创建  不然会占用id
+                            this.myChart.dispose();
+                            this.drawLine();
+                        }
+                        else {
+                            this.$message.error('查询失败');
+                        }
                     }).catch(error => {
-                        this.$notify.error({
-                            title: "查询失败",
-                            message: error
-                        });
+                        this.$message.error('查询失败');
                     });
                 }
             }
         }
     )
-        //更新元素
-        function Query(value, ok, id) {
-        //隐藏元素
-        if (id) {
-            document.getElementById(id).style.display = 'none';
-        }
-        let add = new Dlg({
-            propsData: {
-                close: () => {
-                    if (id) {
-                        //恢复
-                        document.getElementById(id).style.display = '';
-                    }
-                    add.$el.remove();
-                },
-                ok: ok,
-                title: '',
-                form: JSON.parse(JSON.stringify(value)),
-                Add: false,
-                Edit: true
-            }
-        });
-        let vm = add.$mount();
-        let el = vm.$el;
-        document.body.appendChild(el);
-        vm.show = true;
-    }
     </script>
 }

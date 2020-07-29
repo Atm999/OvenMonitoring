@@ -1,10 +1,12 @@
 ﻿using Entity.Enums;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Entity
 {
+    [SugarTable("oven_info")]
     public class OvenInfo : BasicEntity
     {
         /// <summary>
@@ -12,43 +14,81 @@ namespace Entity
         /// </summary>
         public string oven_name { get; set; }
         /// <summary>
-        /// 创建者id
+        /// 是否启用该烤炉
         /// </summary>
-        public int creation_id { get; set; }
+        public bool oven_enable { set; get; }
+        /// <summary>
+        /// 是否启用host
+        /// </summary>
+        public bool host_enable { set; get; }
+        /// <summary>
+        /// 创建者用户名
+        /// </summary>
+        public string creation_name { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>
         public DateTime creation_time { get; set; }
+        #region   采集器通讯参数
         /// <summary>
-        /// COM口(唯一)
+        /// 采集器采集频率
         /// </summary>
-        public string serial_port { get; set; }
+        public decimal collector_frequency { get; set; }   
+        /// <summary>
+        /// COM口
+        /// </summary>
+        public int collector_port { get; set; }
         /// <summary>
         /// 波特率
         /// </summary>
-        public SerialPortParameter.SerialPortBaudRates baud_rate { get; set; }
+        public SerialPortParameter.SerialPortBaudRates collector_baud_rate { get; set; }
         /// <summary>
         /// 数据位
         /// </summary>
-        public SerialPortParameter.SerialPortDatabits data_bit{get;set;}
+        public SerialPortParameter.SerialPortDatabits collector_data_bit { get;set;}
         /// <summary>
         /// 停止位
         /// </summary>
-        public SerialPortParameter.SerialStopBits stop_bit { get; set; }
+        public SerialPortParameter.SerialStopBits collector_stop_bit { get; set; }
         /// <summary>
         /// 奇偶校验
         /// </summary>
-        public SerialPortParameter.SerialParity parity { get; set; }
-        
+        public SerialPortParameter.SerialParity collector_parity { get; set; }
         /// <summary>
-        /// 烤箱状态
+        /// 双工
         /// </summary>
-        public OvenParameter.OvenState oven_state { get; set; }
-        /// <summary>
-        /// 烤箱门状态
-        /// </summary>
-        public OvenParameter.DoorState door_state { get; set; }
+        public SerialPortParameter.SerialPortDuplex collector_duplex { set; get; }
+        #endregion
 
+        #region   温控器通讯参数
+        /// <summary>
+        /// COM口
+        /// </summary>
+        public int thermostat_port { get; set; }
+        /// <summary>
+        /// 波特率
+        /// </summary>
+        public SerialPortParameter.SerialPortBaudRates thermostat_baud_rate { get; set; }
+        /// <summary>
+        /// 数据位
+        /// </summary>
+        public SerialPortParameter.SerialPortDatabits thermostat_data_bit { get; set; }
+        /// <summary>
+        /// 停止位
+        /// </summary>
+        public SerialPortParameter.SerialStopBits thermostat_stop_bit { get; set; }
+        /// <summary>
+        /// 奇偶校验
+        /// </summary>
+        public SerialPortParameter.SerialParity thermostat_parity { get; set; }
+        /// <summary>
+        /// 双工
+        /// </summary>
+        public SerialPortParameter.SerialPortDuplex thermostat_duplex { set; get; }
+        #endregion
+
+
+        #region 烤箱设定
         /// <summary>
         /// 补偿温度
         /// </summary>
@@ -63,11 +103,19 @@ namespace Entity
         public decimal compensate_p5 { get; set; } = 0;
 
         public decimal compensate_p6 { get; set; } = 0;
-
         /// <summary>
-        /// 更新者id
+        /// 温度下限
         /// </summary>
-        public int update_id { get; set; }
+        public decimal lower_limit { set; get; }
+        /// <summary>
+        /// 温度上限
+        /// </summary>
+        public decimal upper_limit { set; get; }
+        #endregion
+        /// <summary>
+        /// 更新者 用户名
+        /// </summary>
+        public string update_name { get; set; }
         /// <summary>
         /// 更新时间
         /// </summary>

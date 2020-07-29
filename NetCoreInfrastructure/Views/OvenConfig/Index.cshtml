@@ -1,0 +1,168 @@
+﻿@section csses
+    {
+    <style>
+        .el-table .warning-row {
+            background: #ff6a00;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+
+        .el-table-column {
+            text-align: "center";
+        }
+    </style>
+}
+<el-button type="primary">新增</el-button>
+
+<el-tabs v-model="activeName" type="border-card">
+    <el-tab-pane label="烤箱设定"  name="first">
+        <el-table :data="tableData"
+                  ref="multipleTable"
+                  tooltip-effect="dark"
+                  style="width: 100%"
+                  :row-class-name="tableRowClassName">
+            <el-table-column prop="oven_name" align="center"
+                             label="烤箱名称"
+                             width="120">
+            </el-table-column>
+            <el-table-column prop="oven_enable"
+                             label="是否启用" align="center"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="host_enbale" align="center"
+                             label="host通讯"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="frequency" align="center"
+                             label="采集频率"
+                             width="100">
+            </el-table-column>
+            <el-table-column prop="temperature_max" align="center"
+                             label="温度上限"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="temperature_min" align="center"
+                             label="温度下限"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="compensate_p1" align="center"
+                             label="P1修正温度"
+                             width="100">
+            </el-table-column>
+            <el-table-column prop="compensate_p2" align="center"
+                             label="P2修正温度"
+                             width="100">
+            </el-table-column>
+            <el-table-column prop="compensate_p3" align="center"
+                             label="P3修正温度"
+                             width="100">
+            </el-table-column>
+            <el-table-column prop="compensate_p4" align="center"
+                             label="P4修正温度"
+                             width="100">
+            </el-table-column>
+            <el-table-column prop="compensate_p5" align="center"
+                             label="P5修正温度"
+                             width="100">
+            </el-table-column>
+            <el-table-column prop="compensate_p6" align="center"
+                             label="P6修正温度"
+                             width="100">
+            </el-table-column>
+
+            <el-table-column label="操作" align="center"
+                             width="120">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle></el-button>
+                    <el-button type="danger" icon="el-icon-delete" circle></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-tab-pane>
+    <el-tab-pane label="系统设定" name="second">
+        <el-table :data="tableData" 
+                  ref="multipleTable"
+                  tooltip-effect="dark"
+                  style="width: 100%"
+                  :default-sort="{prop: 'status', order: 'descending'}"
+                  :row-class-name="tableRowClassName">
+            <el-table-column prop="oven_name" align="center"
+                             label="烤箱名称"
+                             width="120">
+            </el-table-column>
+            <el-table-column prop="serial_port"
+                             label="端口号" align="center"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="baud_rate" align="center"
+                             label="波特率"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="data_bit" align="center"
+                             label="数据位数"
+                             width="80">
+            </el-table-column>
+            <el-table-column prop="stop_bit" align="center"
+                             label="停止位"
+                             width="100">
+            </el-table-column>
+
+            <el-table-column prop="parity" align="center"
+                             label="奇偶校验位"
+                             width="120">
+            </el-table-column>
+
+            <el-table-column label="操作" align="center"
+                             width="120">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle></el-button>
+                    <el-button type="danger" icon="el-icon-delete" circle></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-tab-pane>
+</el-tabs>
+
+@section Scripts
+    {
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    ovens: [{
+                        value: '',
+                        label: ''
+                    }],
+                    oven: '',
+                    tableData: [{
+                        oven_name: '烤箱1',
+                        oven_enable: true,
+                        host_enbale: false,
+                        frequency: 1,
+                        temperature_max: '25',
+                        temperature_min: '20',
+                        compensate_p1: 1,
+                        compensate_p2: 1,
+                        compensate_p3: 1,
+                        compensate_p4: 1,
+                        compensate_p5: 1,
+                        compensate_p6: 1,
+                    }],
+                    activeName: 'first'
+                }
+            },
+            mounted() {
+
+            },
+            methods: {
+                handleClick(tab, event) {
+                    console.log(tab, event);
+                }
+            }
+        }
+        )
+    </script>
+}

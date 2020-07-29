@@ -64,5 +64,13 @@ namespace Entity.Enums
             BaudRate_230400 = 230400,
             BaudRate_256000 = 256000
         }
+
+        public enum SerialPortDuplex : int
+        {
+            None = 0,
+            Simplex = 1,
+            Half_duplex = 2,
+            Full_duplex = 3,
+        }
     }
 }

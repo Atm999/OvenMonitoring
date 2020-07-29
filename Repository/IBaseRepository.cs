@@ -19,6 +19,7 @@ namespace Repository
         bool Insert(SqlSugarClient client, T t);
 
         long InsertBigIdentity(T t);
+        int InsertReturnIdentity(T t);
 
         bool Insert(List<T> t);
 
@@ -40,6 +41,7 @@ namespace Repository
 
         #region update
 
+        bool Saveable(List<T> saveObjects);
         bool UpdateEntity(T entity);
 
         bool Update(T entity, Expression<Func<T, bool>> expression);

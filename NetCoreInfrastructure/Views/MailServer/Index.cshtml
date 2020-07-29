@@ -1,0 +1,217 @@
+﻿@section csses
+{
+    <style>
+        .el-button {
+
+        }
+    </style>
+}
+<el-row :gutter="8">
+    <el-col :span="8">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>邮件服务器设定</span>
+            </div>
+            <el-form style="width:400px" ref="form" :rules="rules" :model="form" label-width="120px">
+                <el-form-item label="主机地址" prop="host">
+                    <el-input v-model="form.host"></el-input>
+                </el-form-item>
+                <el-form-item label="端口号" prop="port">
+                    <el-input v-model.number="form.port"></el-input>
+                </el-form-item>
+                <el-form-item label="发件人账号"  prop="name">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="发件人密码"  prop="password">
+                    <el-input v-model="form.password"></el-input>
+                </el-form-item>
+                <el-form-item label="是否启用ssl"  prop="enable_ssl">
+                    <el-switch v-model="form.enable_ssl"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949">
+                    </el-switch>
+                </el-form-item>
+                <el-form-item label="是否启用警报" prop="enabled_alert">
+                    <el-switch v-model="form.enabled_alert"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949">
+                    </el-switch>
+                </el-form-item>
+                <el-form-item style="float:right">
+                    <el-button type="primary"  v-on:click="onSubmit()">确定</el-button>
+                    <el-button>取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+    </el-col>
+
+
+    <el-col :span="8">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>收件人信息</span>
+            </div>
+            <el-button type="primary" v-on:click="dialogVisible = true" style="float:right">添加</el-button>
+            <template>
+                <el-table :data="tableData"
+                          style="width: 100%">
+                    <el-table-column prop="address"
+                                     label="收件人地址"
+                                     width="300">
+                    </el-table-column>
+                    <el-table-column prop="operation"
+                                     label="操作">
+                        <template slot-scope="scope">
+                            <el-button type="danger" icon="el-icon-delete" v-on:click="DeleteReceiver(scope)" circle></el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+        </el-card>
+    </el-col>
+</el-row>
+
+
+@* 弹窗 *@
+<el-dialog title="新增用户"
+           :visible.sync="dialogVisible"
+           :before-close="handleClose"
+           width="40%">
+    <el-form style="width:400px" ref="form" :rules="rules" :model="form" label-width="120px">
+        <el-form-item label="收件人邮箱" prop="address">
+            <el-input v-model="form.address"></el-input>
+        </el-form-item>
+    </el-form>
+        @*<el-input prop="mail" :rules="rules" v-model="address"></el-input>*@
+        <span slot="footer" class="dialog-footer" >
+            <el-button v-on:click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" v-on:click="AddReceiver(form.address)">确 定</el-button>
+        </span>
+</el-dialog>
+
+@section Scripts
+{
+<script>
+
+
+    var vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                form: {
+                    id: 1,
+                    host: '',
+                    port: parseInt(0),
+                    name: '',
+                    password: '',
+                    enable_ssl: false,
+                    enabled_alert: false
+                },
+                rules: {
+                    host: [{ required: true, validator: validateIP, trigger: 'blur' }],
+                    port: [{ required: true, validator: isPort, trigger: 'blur' }],
+                    name: [{ required: true, validator: validateEMail, trigger: 'blur' }],
+                    password: [{ required: true, max: 9, min: 3, trigger: 'blur' }],
+                    address: [{ required: true, validator: validateEMail, trigger: 'blur' }]
+                },
+                dialogVisible: false,
+                tableData: [],
+                address: '',
+
+            }
+        },
+        mounted() {
+            this.Get();
+        },
+        methods: {
+            Get() {
+                axios.get("/MailServer/Get").then(re => {
+                    this.form = re.data.emailConfig;
+                    this.tableData = re.data.emailReceivers
+                }).catch(error => {
+                    this.$message.error('修改失败');;
+                });
+            },
+            onSubmit() {
+                this.$refs["form"].validate((val) => {
+                    if (val) {
+                        axios.post("/MailServer/EditConfig", JSON.stringify(this.form), { headers: { 'Content-Type': 'application/json' } }).then(re => {
+                            if (re) {
+                                this.$message({
+                                    message: '修改成功',
+                                    type: 'success'
+                                })
+                            }
+                            else {
+                                this.$message.error('修改失败');
+                            }
+                        }).catch(error => {
+                            this.$message.error('修改失败');;
+                        });
+                    }
+                    else {
+                        this.$message.error('修改失败');
+                    }
+                })
+            },
+            AddReceiver(address) {
+                
+                this.$refs["form"].validate((val) => {
+                    if (val) {
+                        let redata = { address: address };
+                        axios.post("/MailServer/AddEmailReceiver", JSON.stringify(redata), { headers: { 'Content-Type': 'application/json' } }).then(re => {
+                            if (re) {
+                                this.$message({
+                                    message: '添加成功',
+                                    type: 'success'
+                                })
+                                this.dialogVisible = false;
+                                this.tableData.push(redata);
+
+                            }
+                            else {
+                                this.$message.error('添加失败');
+                            }
+                        }).catch(error => {
+                            this.$message.error('添加失败');;
+                        });
+                    }
+                    else {
+                        this.$message.error('添加失败');;
+                    }
+                })
+
+            },
+            DeleteReceiver(scope) {
+                axios.post("/MailServer/DeleteEmailReceiver", JSON.stringify(scope.row), { headers: { 'Content-Type': 'application/json' } }).then(re => {
+                    if (re) {
+                        this.$message({
+                            message: '删除成功',
+                            type: 'success'
+                        })
+                        for (var i = 0; i <= this.tableData.length; i++) {
+                            if (this.tableData[i].address == scope.row.address) {
+                                this.tableData.splice(i, 1);
+                                break;
+                            }
+                        }
+                        this.dialogVisible = false;
+                    }
+                    else {
+                        this.$message.error('删除失败');
+                    }
+                }).catch(error => {
+                    this.$message.error('删除失败');;
+                });
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => { });
+            }
+        }
+    })
+</script>
+}

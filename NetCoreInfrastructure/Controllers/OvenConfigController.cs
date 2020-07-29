@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OvenMonitoring.Controllers
 {
-    public class VueComponentsController : Controller
+    public class OvenConfigController : Controller
     {
-        public IActionResult DatePicker()
+        public IActionResult Index()
         {
             return View();
         }

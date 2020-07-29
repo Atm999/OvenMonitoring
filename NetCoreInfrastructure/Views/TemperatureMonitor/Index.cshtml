@@ -2,26 +2,44 @@
     {
 }
 <div>
-    <el-row :gutter="12">
-        <el-col :span="12" v-for="(o, index) in 20">
+    <el-row :gutter="8">
+        <el-col :span="12" v-for="(o, index) in list">
             <el-card class="box-card">
                 <div slot="header" class="clearfix">
-                    <span>烤箱</span>
-                </div>
-                <div id="myChart" style="width:500px;height:300px;float:left;" ref="chart"></div>
-            </el-card>
-        </el-col>
-        @*<el-col :span="12">
-            <el-card class="box-card">
-                <div slot="header" class="clearfix">
-                    <span>烤箱2</span>
-
+                    <span>{{o.name}}</span>
                 </div>
                 <div>
-                    <div id="myChart1" style="width:500px;height:300px;float:left;" ref="chart"></div>
+                    <div :id="o.id" style="width:600px;height:300px" ref="chart"></div>
+                        <el-table :data="tableData.a" 
+                                  style="width: 100%">
+                            <el-table-column prop="door"
+                                             label="door"
+                                             width="90">
+                            </el-table-column>
+                            <el-table-column prop="dam"
+                                             label="DAM"
+                                             width="90">
+                            </el-table-column>
+                            <el-table-column prop="tc"
+                                             label="TC"
+                                             width="90">
+                            </el-table-column>
+                            <el-table-column prop="remain_time"
+                                             label="剩余时间"
+                                             width="90">
+                            </el-table-column>
+                            <el-table-column prop="oven_status"
+                                             label="烤箱状态"
+                                             width="90">
+                            </el-table-column>
+                            <el-table-column prop="project_status"
+                                             label="专案状态"
+                                             width="90">
+                            </el-table-column>
+                        </el-table>
                 </div>
             </el-card>
-         </el-col>*@
+        </el-col>
     </el-row>
 </div>
     
@@ -34,46 +52,132 @@
             return {
                 echartdata: {
                     'tag': ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'],
-                    'P1': [220, 222, 224, 223, 220, 223]
+                },
+                list:
+                    [
+                        //{
+                        //    'id': 1,
+                        //    'name': '烤箱1',
+                        //    'data': [220, 222, 224, 223, 220, 223]
+                        //},
+                        //{
+                        //    'id': 2,
+                        //    'name': '烤箱2',
+                        //    'data': [220, 222, 224, 223, 220, 1223]
+                        //},
+                        //{
+                        //    'id': 3,
+                        //    'name': '烤箱3',
+                        //    'data': [220, 222, 224, 223, 220, 1000]
+                        //},
+                        //{
+                        //    'id': 4,
+                        //    'name': '烤箱4',
+                        //    'data': [220, 222, 224, 223, 220, 223]
+                        //},
+                    ],
+                tableData: {
+                    a: [
+                        {
+                            door: 'open',
+                            dam: 'disconn',
+                            tc: 'conn',
+                            remain_time: '12min',
+                            oven_status: 'wait',
+                            project_status: 'wait',
+                        }
+                    ],
+                    b: [
+                        {
+                            door: 'open',
+                            dam: 'disconn',
+                            tc: 'conn',
+                            remain_time: '12min',
+                            oven_status: 'wait',
+                            project_status: 'wait',
+                        }
+                    ]
                 }
             }
         },
         mounted() {
-            this.drawLine('myChart');
-            this.drawLine('myChart1');
+            this.getData();          
+            this.timer();
+            
         },
         methods: {
-            //echarts绘制函数
-            drawLine(name) {
-                // 基于准备好的dom，初始化echarts实例
-                let myChart = echarts.init(document.getElementById(name), 'walden')
-                // 绘制图表
-                myChart.setOption({
-                    tooltip: {},
-                    xAxis: {
-                        data: this.echartdata.tag
-                    },
-                    yAxis: {
-                    },
+            timer() {
+                return setInterval(() => {
+                    this.getData()                   
+                }, 1000)
+            },
+            getData() {
+                axios.get("/TemperatureMonitor/GetCurrentData").then(re => {
+                    if (re.data.length > 0) {
+                        var List = [];
+                        var tableData = [];
+                        for (var i = 0; i < re.data.length; i++) {
+                            let list_obj = {
+                                'id': re.data[i].id,
+                                'name': re.data[i].oven_name,
+                                'data': [re.data[i].p1, re.data[i].p2, re.data[i].p3, re.data[i].p4, re.data[i].p5, re.data[i].p6]
+                            }
+                            let tableData_obj = {
+                                door: re.data[i].door_state,
+                                dam: re.data[i].dam_state,
+                                tc: re.data[i].tc,
+                                remain_time: '12min',
+                                oven_status: re.data[i].oven_state,
+                                project_status: re.data[i].project_status,
+                            }
+                            List.push(list_obj);
+                            tableData.push(tableData_obj);
+                        }
+                        this.list = List;
+                        //this.tableData = tableData;
+                        this.drawLine(this.list);
+                    }
+                    else {
 
-                    series: [{
-                        name: 'P1',
-                        type: 'bar',
-                        data: this.echartdata.P1,
-                        itemStyle: {
-                            normal: {
-                                label: {
-                                    show: true, //开启显示	
-                                    position: 'top', //在上方显示
-                                    textStyle: {
-                                        //数值样式										
-                                        color: 'black', fontSize: 16
+                    }
+                }).catch(error => {
+
+                });
+            },
+
+            //echarts绘制函数
+            drawLine(list) {
+                for (var i = 0; i < list.length; i++) {
+                    // 基于准备好的dom，初始化echarts实例
+                    let myChart = echarts.init(document.getElementById(list[i].id), 'walden')
+                    // 绘制图表
+                    myChart.setOption({
+                        tooltip: {},
+                        xAxis: {
+                            data: this.echartdata.tag
+                        },
+                        yAxis: {
+                        },
+                        series: [{
+                            name: 'P1',
+                            type: 'scatter',
+                            data: list[i].data,
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true, //开启显示	
+                                        position: 'top', //在上方显示
+                                        textStyle: {
+                                            //数值样式										
+                                            color: 'black', fontSize: 16
+                                        }
                                     }
                                 }
                             }
-                        }
-                    }]
-                });
+                        }]
+                    });
+                }
+
             }
         }
     })

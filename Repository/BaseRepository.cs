@@ -36,6 +36,8 @@ namespace Repository
             return _db.Insertable(t).ExecuteReturnBigIdentity();
         }
 
+
+
         public bool Insert(List<T> t)
         {
             return _db.Insertable(t).ExecuteCommand() > 0;
@@ -352,6 +354,16 @@ namespace Repository
             {
                 return false;
             }
+        }
+
+        public bool Saveable(List<T> saveObjects)
+        {
+            return _db.Saveable(saveObjects).ExecuteCommand() > 0;
+        }
+
+        public int InsertReturnIdentity(T t)
+        {
+            return _db.Insertable(t).ExecuteReturnIdentity();
         }
     }
 }

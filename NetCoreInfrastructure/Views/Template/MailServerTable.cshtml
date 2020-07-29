@@ -1,0 +1,57 @@
+﻿<template>
+        <el-col :span="8">
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>邮件服务器设定</span>
+            </div>
+            <el-form style="width:400px" ref="form" :rules="rules" :model="form" label-width="120px">
+                <el-form-item label="主机地址">
+                    <el-input v-model="form.host"></el-input>
+                </el-form-item>
+                <el-form-item label="端口号">
+                    <el-input v-model="form.port"></el-input>
+                </el-form-item>
+                <el-form-item label="发件人账号">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="发件人密码">
+                    <el-input v-model="form.password"></el-input>
+                </el-form-item>
+                <el-form-item label="是否启用ssl">
+                    <el-switch v-model="form.enable_ssl"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949">
+                    </el-switch>
+                </el-form-item>
+                <el-form-item label="是否启用警报">
+                    <el-switch v-model="form.enabled_alert"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949">
+                    </el-switch>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" v-on:click="onSubmit()">确定</el-button>
+                    <el-button>取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+    </el-col>
+</template>
+
+<script>
+    var Profile = Vue.extend({
+        props: {
+            form: {
+                type: Object,
+                default: () => {
+                    return {
+                        Shelf: null,
+                        Name: null
+                    };
+                }
+            }
+        },
+    })
+    // 创建 Profile 实例，并挂载到一个元素上。
+    new Profile().$mount('#mount-point')
+</script>

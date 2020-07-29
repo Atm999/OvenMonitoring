@@ -1,0 +1,15 @@
+﻿
+<script>
+    function Common(obj) {
+        this.Get = function () {
+            axios.get("/OvenSystemConfig/GetOvenInfo").then(re => {
+                console.log(re.data);              
+                return re.data;
+            }).catch(error => {
+                //this.$message.error('获取失败');
+            });
+        }
+
+    }
+</script>
+

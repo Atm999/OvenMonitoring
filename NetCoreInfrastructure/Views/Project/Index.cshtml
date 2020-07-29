@@ -1,0 +1,556 @@
+﻿@section csses
+    {
+    <style>
+        .el-table .warning-row {
+            background: #ff6a00;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+
+        .el-table-column {
+            text-align: "center";
+        }
+    </style>
+}
+
+<el-button type="primary" v-on:click="dv_add = true">新增</el-button>
+<el-table :data="tableData"
+          tooltip-effect="dark"
+          style="width: 100%"
+          :default-sort="{prop: 'project_status', order: 'descending'}">
+    <el-table-column prop="id" align="center" v-if:""
+                     width="120">
+    </el-table-column>
+    <el-table-column prop="name" align="center"
+                     label="专案名"
+                     width="120">
+    </el-table-column>
+    <el-table-column prop="oven_name" align="center"
+                     label="烤箱名称"
+                     width="120">
+    </el-table-column>
+    <el-table-column prop="project_status"
+                     label="专案状态" align="center"
+                     width="120">
+    </el-table-column>
+    <el-table-column prop="start_time" align="center"
+                     label="开始时间"
+                     width="200">
+    </el-table-column>
+    <el-table-column prop="end_time" align="center"
+                     label="结束时间"
+                     width="200">
+    </el-table-column>
+    <el-table-column label="编辑专案" align="center"
+                     width="120">
+        <template slot-scope="scope">
+            <el-button type="primary" icon="el-icon-edit" v-on:click="EditProject(scope.row.id)" circle></el-button>
+        </template>
+    </el-table-column>
+    <el-table-column label="删除专案" align="center"
+                     width="120">
+        <template slot-scope="scope">
+            <el-button type="danger" icon="el-icon-delete" circle v-on:click="DeleteProject(scope.row.id)"></el-button>
+        </template>
+    </el-table-column>
+    <el-table-column label="开始专案" align="center"
+                     width="120">
+        <template slot-scope="scope">
+            <el-button type="success" icon="el-icon-video-play"  circle v-on:click="StartProject(scope.row.id)" v-if="scope.row.project_status === '未开始'"></el-button>
+        </template>
+    </el-table-column>
+    <el-table-column label="结束专案" align="center"
+                     width="120">
+        <template slot-scope="scope">
+            <el-button type="info" icon="el-icon-video-pause" circle v-on:click="FinishProject(scope.row.id)" v-if="scope.row.project_status === '执行中'"></el-button>
+        </template>
+    </el-table-column>
+</el-table>
+
+@* 弹窗 *@
+<el-dialog title="编辑"
+           :visible.sync="dv_edit"
+           :before-close="handleClose"
+           width="50%">
+    <el-form :inline="true" :model="form" class="demo-form-inline">
+        <el-tabs border-card>
+            <el-tab-pane label="基础设定" name="first">
+                <el-form-item label="烤箱名称" prop="oven_name">
+                    <el-select v-model="form.oven_id" disabled placeholder="请选择">
+                        <el-option v-for="item in ovens"
+                                   :key="item.oven_name"
+                                   :label="item.oven_name"
+                                   :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="温度上下限" prop="tolerance">
+                    <el-input v-model.number="form.tolerance"></el-input>
+                </el-form-item>
+                <el-form-item label="升温段报警" prop="rise_tmep_alarm">
+                    <el-switch v-model="form.rise_temp_alarm"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949">
+                    </el-switch>
+                </el-form-item>
+                <el-form-item label="恒温段报警" prop="const_tmep_alarm">
+                    <el-switch v-model="form.const_temp_alarm"
+                               active-color="#13ce66"
+                               inactive-color="#ff4949">
+                    </el-switch>
+                </el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="温段设定" name="second">
+                <el-divider content-position="left">温段1</el-divider>
+                <el-form-item label="时间" prop="time1">
+                    <el-input v-model.number="form.heatStep1.duration"></el-input>
+                </el-form-item>
+                <el-form-item label="温度" prop="temperature1">
+                    <el-input v-model.number="form.heatStep1.temperature"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">温段2</el-divider>
+                <el-form-item label="时间" prop="time2">
+                    <el-input v-model.number="form.heatStep2.duration"></el-input>
+                </el-form-item>
+                <el-form-item label="温度" prop="temperature2">
+                    <el-input v-model.number="form.heatStep2.temperature"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">温段3</el-divider>
+                <el-form-item label="时间" prop="time3">
+                    <el-input v-model.number="form.heatStep3.duration"></el-input>
+                </el-form-item>
+                <el-form-item label="温度" prop="temperature3">
+                    <el-input v-model.number="form.heatStep3.temperature"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">温段4</el-divider>
+                <el-form-item label="时间" prop="time4">
+                    <el-input v-model.number="form.heatStep4.duration"></el-input>
+                </el-form-item>
+                <el-form-item label="温度" prop="temperature4">
+                    <el-input v-model.number="form.heatStep4.temperature"></el-input>
+                </el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="TM.SIG设定" name="third">
+                <el-divider content-position="left">TM.SIG1</el-divider>
+                <el-form-item label="S.SN" prop="SSN1">
+                    <el-input v-model.number="form.tmSig1.ssn"></el-input>
+                </el-form-item>
+                <el-form-item label="S.TM" prop="STM1">
+                    <el-input v-model.number="form.tmSig1.stm"></el-input>
+                </el-form-item>
+                <el-form-item label="E.SN" prop="ESN1">
+                    <el-input v-model.number="form.tmSig1.esn"></el-input>
+                </el-form-item>
+                <el-form-item label="E.TM" prop="ETM1">
+                    <el-input v-model.number="form.tmSig1.etm"></el-input>
+                </el-form-item>
+                <el-form-item label="OUT" prop="OUT">
+                    <el-input v-model.number="form.tmSig1.sout"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">TM.SIG2</el-divider>
+                <el-form-item label="S.SN" prop="SSN1">
+                    <el-input v-model.number="form.tmSig2.ssn"></el-input>
+                </el-form-item>
+                <el-form-item label="S.TM" prop="STM1">
+                    <el-input v-model.number="form.tmSig2.stm"></el-input>
+                </el-form-item>
+                <el-form-item label="E.SN" prop="ESN1">
+                    <el-input v-model.number="form.tmSig2.esn"></el-input>
+                </el-form-item>
+                <el-form-item label="E.TM" prop="ETM1">
+                    <el-input v-model.number="form.tmSig2.etm"></el-input>
+                </el-form-item>
+                <el-form-item label="OUT" prop="OUT">
+                    <el-input v-model.number="form.tmSig2.sout"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">TM.SIG3</el-divider>
+                <el-form-item label="S.SN" prop="SSN1">
+                    <el-input v-model.number="form.tmSig3.ssn"></el-input>
+                </el-form-item>
+                <el-form-item label="S.TM" prop="STM1">
+                    <el-input v-model.number="form.tmSig3.stm"></el-input>
+                </el-form-item>
+                <el-form-item label="E.SN" prop="ESN1">
+                    <el-input v-model.number="form.tmSig3.esn"></el-input>
+                </el-form-item>
+                <el-form-item label="E.TM" prop="ETM1">
+                    <el-input v-model.number="form.tmSig3.etm"></el-input>
+                </el-form-item>
+                <el-form-item label="OUT" prop="OUT">
+                    <el-input v-model.number="form.tmSig3.sout"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">TM.SIG4</el-divider>
+                <el-form-item label="S.SN" prop="SSN1">
+                    <el-input v-model.number="form.tmSig4.ssn"></el-input>
+                </el-form-item>
+                <el-form-item label="S.TM" prop="STM1">
+                    <el-input v-model.number="form.tmSig4.stm"></el-input>
+                </el-form-item>
+                <el-form-item label="E.SN" prop="ESN1">
+                    <el-input v-model.number="form.tmSig4.esn"></el-input>
+                </el-form-item>
+                <el-form-item label="E.TM" prop="ETM1">
+                    <el-input v-model.number="form.tmSig4.etm"></el-input>
+                </el-form-item>
+                <el-form-item label="OUT" prop="OUT">
+                    <el-input v-model.number="form.tmSig4.sout"></el-input>
+                </el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="PID设定" name="fourth">
+                <el-divider content-position="left">PID1</el-divider>
+                <el-form-item label="P" prop="P1">
+                    <el-input v-model.number="form.pid1.p"></el-input>
+                </el-form-item>
+                <el-form-item label="I" prop="I1">
+                    <el-input v-model.number="form.pid1.i"></el-input>
+                </el-form-item>
+                <el-form-item label="D" prop="D1">
+                    <el-input v-model.number="form.pid1.d"></el-input>
+                </el-form-item>
+                <el-divider content-position="left">PID2</el-divider>
+                <el-form-item label="P" prop="P2">
+                    <el-input v-model.number="form.pid2.p"></el-input>
+                </el-form-item>
+                <el-form-item label="I" prop="I2">
+                    <el-input v-model.number="form.pid2.i"></el-input>
+                </el-form-item>
+                <el-form-item label="D" prop="D3">
+                    <el-input v-model.number="form.pid2.d"></el-input>
+                </el-form-item>
+            </el-tab-pane>
+        </el-tabs>
+        <el-row :gutter="20">
+            <el-col :span="8">
+                <div class="grid-content bg-purple">
+                </div>
+            </el-col>
+            <el-col :span="8">
+                <div class="grid-content bg-purple">
+                </div>
+            </el-col>
+        </el-row>
+    </el-form>
+    @*<el-input prop="mail" :rules="rules" v-model="address"></el-input>*@
+    <span slot="footer" class="dialog-footer">
+        <el-button v-on:click="dv_edit = false">取 消</el-button>
+        <el-button type="primary" v-on:click="UpdateProject(form)">确 定</el-button>
+    </span>
+</el-dialog>
+
+<el-dialog title="新增项目"
+           :visible.sync="dv_add"
+           :before-close="handleClose"
+           width="50%">
+    <el-form ref="add_form" :model="add_form" label-width="80px">
+        <el-form-item label="烤箱名称" prop="oven_name">
+            <el-select v-model="add_form.oven_id" placeholder="请选择">
+                <el-option v-for="item in ovens"
+                           :key="item.oven_name"
+                           :label="item.oven_name"
+                           :value="item.id">
+                </el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="工程名称">
+            <el-input v-model="add_form.name"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button v-on:click="dv_add = false">取 消</el-button>
+            <el-button type="primary" v-on:click="AddProject">确 定</el-button>
+        </el-form-item>
+    </el-form>
+</el-dialog>
+
+@section Scripts
+{
+    @await Html.PartialAsync("/Views/Base.cshtml")
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    add_form: {
+                        name: '',
+                        oven_id: 0,
+                        project_status: 0,
+                        rise_temp_alarm: false,
+                        const_temp_alarm: false,
+                        tolerance: 0,
+                    },
+                    form: {
+                        id: 1,
+                        oven_id: 0,
+                        project_status: 0,
+                        //start_time: '2020-01-01 00:00:00',
+                        //end_time: '2020-01-01 00:00:00',
+                        rise_temp_alarm: false,
+                        const_temp_alarm: false,
+                        tolerance: 5,
+                        heatStep1: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            duration: 1,
+                            temperature: 1,
+                        },
+                        heatStep2: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            duration: 1,
+                            temperature: 1,
+                        },
+                        heatStep3: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            duration: 1,
+                            temperature: 1,
+                        },
+                        heatStep4: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            duration: 1,
+                            temperature: 1,
+                        },
+                        tmSig1: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            sout: 1,
+                            ssn: 1,
+                            stm: 1,
+                            esn: 1,
+                            etm: 1,
+                        },
+                        tmSig2: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            sout: 1,
+                            ssn: 1,
+                            stm: 1,
+                            esn: 1,
+                            etm: 1,
+                        },
+                        tmSig3: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            sout: 1,
+                            ssn: 1,
+                            stm: 1,
+                            esn: 1,
+                            etm: 1,
+                        },
+                        tmSig4: {
+                            id: 1,
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            sout: 1,
+                            ssn: 1,
+                            stm: 1,
+                            esn: 1,
+                            etm: 1,
+                        },
+                        pid1: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            p: 1,
+                            i: 1,
+                            d: 1,
+                        },
+                        pid2: {
+                            id: 1,
+                            project_id: 1,
+                            order_id: 1,
+                            p: 1,
+                            i: 1,
+                            d: 1,
+                        }
+                    },
+                    tableData: [
+                        //{
+                        //id: 1,
+                        //name:'',
+                        //oven_name: '烤箱1',
+                        //project_status: "执行中",
+                        //start_time: '',
+                        //end_time: ''
+                        //}
+                    ],
+                    ovens: [
+                        {
+                            oven_name: '',
+                            id: 1
+                        }
+                    ],
+                    dv_add: false,
+                    dv_edit: false
+                }
+            },
+            mounted() {
+                this.GetOvenInfo();
+                this.GetPorjectInfo();
+            },
+            methods: {
+                GetOvenInfo() {
+                    axios.get("/OvenSystemConfig/GetOvenInfo").then(re => {
+                        this.ovens = re.data;
+                    }).catch(error => {
+                        this.$message.error('获取失败');
+                    });
+                },
+
+                GetPorjectInfo() {
+                    axios.get("/Project/GetProjectInfo").then(re => {
+                        //this.tableData = re.data;
+                        for (var i = 0; i < re.data.length; i++) {
+                            if (re.data[i].project_status == 0) {
+                                re.data[i].project_status = "未开始";
+                            }
+                            if (re.data[i].project_status == 1) {
+                                re.data[i].project_status = "执行中";
+                            }
+                            if (re.data[i].project_status == 2) {
+                                re.data[i].project_status = "结束";
+                            }
+                            this.tableData.push(re.data[i]);
+                        }
+                    }).catch(error => {
+                        this.$message.error('获取失败');
+                    });
+                },
+                AddProject() {
+                    axios.post("/Project/AddProjectInfo", this.add_form).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '新增成功',
+                                type: 'success'
+                            })
+                            this.dv_add = false;
+                            window.location.reload();
+                        }
+                        else {
+                            this.$message.error('新增失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('新增失败');
+                    });
+                },
+                EditProject(id) {
+                    axios.get("/Project/GetProjectDetailInfo?id=" + id).then(re => {
+                        if (re.data) {
+                            this.form = re.data;
+                            this.dv_edit = true;                        
+                        }
+                        else {
+                            
+                        }
+                    }).catch(error => {
+                        this.$message.error('失败');
+                    });
+                }, 
+                UpdateProject(form) {
+                    axios.post("/Project/UpdateProjectInfo",form).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '更新成功',
+                                type: 'success'
+                            })
+                            this.dv_edit = false;
+                        }
+                        else {
+                            this.$message.error('更新失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('更新失败');
+                    });
+                },
+                DeleteProject(id) {
+                    axios.get("/Project/DeleteProjectInfo?id=" + id).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            })
+                            for (var i = 0; i <= this.tableData.length; i++) {
+                                if (this.tableData[i].id == id) {
+                                    this.tableData.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            this.$message.error('删除失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('删除失败');
+                    });
+                },
+
+                StartProject(id) {
+                    axios.get("/Project/StartProject?id=" + id).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '开始专案成功',
+                                type: 'success'
+                            })
+                            for (var i = 0; i <= this.tableData.length; i++) {
+                                if (this.tableData[i].id == id) {
+                                    this.tableData[i].project_status = "执行中";
+                                    var myDate = new Date();
+                                    this.tableData[i].start_time = myDate.toLocaleString();
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            this.$message.error('开始专案失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('开始专案失败');
+                    });
+                },
+
+                FinishProject(id) {
+                    axios.get("/Project/FinishProject?id=" + id).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '结束专案成功',
+                                type: 'success'
+                            })
+                            for (var i = 0; i <= this.tableData.length; i++) {
+                                if (this.tableData[i].id == id) {
+                                    this.tableData[i].project_status = "结束";
+                                    var myDate = new Date();
+                                    this.tableData[i].end_time = myDate.toLocaleString();
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            this.$message.error('结束专案失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('结束专案失败');
+                    });
+                },
+
+                handleClose(done) {
+                    this.$confirm('确认关闭？')
+                        .then(_ => {
+                            done();
+                        })
+                        .catch(_ => { });
+                }
+            }
+        }
+     )
+    </script>
+}

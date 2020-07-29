@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OvenMonitoring</name>
+    </assembly>
+    <members>
+        <member name="M:OvenMonitoring.Controllers.OvenSystemConfigController.GetOvenInfo">
+            <summary>
+            获取所有烤炉信息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.OvenSystemConfigController.GetOvenInfoByName(System.String)">
+            <summary>
+            根据名字查询烤炉信息
+            </summary>
+            <param name="oven_name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.OvenSystemConfigController.AddOvenInfo(System.String)">
+            <summary>
+            新增烤炉信息 别问为啥不传对象 问就是不知道
+            </summary>
+            <param name="oven_name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.OvenSystemConfigController.UpdateOvenInfo(Entity.OvenInfo)">
+            <summary>
+            更新
+            </summary>
+            <param name="entity"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.OvenSystemConfigController.DeleteOvenInfo(System.String)">
+            <summary>
+            删除
+            </summary>
+            <param name="oven_name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.ProjectController.StartProject(System.Int32)">
+            <summary>
+            开始专案
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.ProjectController.FinishProject(System.Int32)">
+            <summary>
+            结束专案
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.TemperatureHistoryController.GetHistoryData(System.Int32,System.DateTime,System.DateTime)">
+            <summary>
+            获取该时间段内的数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.UserController.GetUserListAsync">
+            <summary>
+            获取用户列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.UserController.CreateUserAsync(System.String,System.String,System.String)">
+            <summary>
+            创建新账户
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OvenMonitoring.Controllers.UserController.LogOut">
+            <summary>
+            登出
+            </summary>
+            <param name="pre_password"></param>
+            <param name="new_password"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,359 @@
+﻿@section csses
+    {
+    <style>
+        .el-table .warning-row {
+            background: #ff6a00;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+
+        .el-table-column {
+            text-align: "center";
+        }
+
+        .sc-input {
+            width: 150px;
+        }
+    </style>
+}
+
+<div style="margin-bottom: 20px;">
+    <el-button type="primary" v-on:click="dialogVisible = true">新增设备</el-button>
+    <el-button type="danger" v-on:click="removeTab">删除设备</el-button>
+</div>
+<el-tabs v-model="editableTabsValue" type="border-card"   v-on:tab-click="handleClick">
+    <el-tab-pane v-for="(item, index) in editableTabs"
+                 :key="item.key"
+                 :label="item.title"
+                 :name="item.name">
+        <el-button type="primary" v-on:click="UpdateOvenInfo">更新</el-button>
+        <el-form ref="form" :model="form" label-width="80px" :inline="true">
+            <el-row :gutter="6">
+                <el-col :span="11">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>通讯设定</span>
+                        </div>
+                        <el-divider content-position="left">温控器</el-divider>
+                        <el-form-item label="端口号">
+                            <input type="hidden" name="_viewstate" v-model="form.id" />
+                            <el-input v-model.number="form.thermostat_port" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="波特率">
+                            <el-input v-model.number="form.thermostat_baud_rate" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="数据位数">
+                            <el-input v-model.number="form.thermostat_data_bit" class="sc-input" ></el-input>
+                        </el-form-item>
+                        <el-form-item label="奇偶检验">
+                            <el-select v-model="form.thermostat_parity" placeholder="请选择" class="sc-input">
+                                <el-option v-for="item in parity_item"
+                                           :key="item.value"
+                                           :label="item.label"
+                                           :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="停止位">
+                            <el-input v-model.number="form.thermostat_stop_bit" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="双工">
+                            <el-select v-model="form.thermostat_duplex" placeholder="请选择" class="sc-input">
+                                <el-option v-for="item in duplex_item"
+                                           :key="item.value"
+                                           :label="item.label"
+                                           :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-divider content-position="left">温度采集</el-divider>
+                        <el-form-item label="采集频率">
+                            <el-input v-model.number="form.collector_frequency" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="端口号">
+                            <el-input v-model.number="form.collector_port" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="波特率">
+                            <el-input v-model.number="form.collector_baud_rate" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="数据位数">
+                            <el-input v-model.number="form.collector_data_bit" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="停止位">
+                            <el-input v-model.number="form.collector_stop_bit" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="奇偶检验">
+                            <el-select v-model="form.collector_parity" placeholder="请选择" class="sc-input">
+                                <el-option v-for="item in parity_item"
+                                           :key="item.value"
+                                           :label="item.label"
+                                           :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="双工">
+                            <el-select v-model="form.collector_duplex" placeholder="请选择" class="sc-input">
+                                <el-option v-for="item in duplex_item"
+                                           :key="item.value"
+                                           :label="item.label"
+                                           :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-card>
+                </el-col>
+                <el-col :span="11">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <span>烤箱设定</span>
+                        </div>
+                        <el-form-item label="烤箱名称">
+                            <el-input v-model="form.oven_name" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="烤箱状态">
+                            <el-switch v-model="form.oven_enable"
+                                       active-color="#13ce66"
+                                       inactive-color="#ff4949">
+                            </el-switch>
+                        </el-form-item>
+                        <el-form-item label="温度上限">
+                            <el-input v-model.number="form.upper_limit" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="温度下限">
+                            <el-input v-model.number="form.lower_limit" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-divider content-position="left">温度补偿</el-divider>
+                        <el-form-item label="P1">
+                            <el-input v-model.number="form.compensate_p1" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="P2">
+                            <el-input v-model.number="form.compensate_p2" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="P3">
+                            <el-input v-model.number="form.compensate_p3" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="P4">
+                            <el-input v-model.number="form.compensate_p4" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="P5">
+                            <el-input v-model.number="form.compensate_p5" class="sc-input"></el-input>
+                        </el-form-item>
+                        <el-form-item label="P6">
+                            <el-input v-model.number="form.compensate_p6" class="sc-input"></el-input>
+                        </el-form-item>
+                    </el-card>
+                </el-col>
+            </el-row>
+        </el-form>
+    </el-tab-pane>
+</el-tabs>
+
+
+
+
+@* 弹窗 *@
+<el-dialog title="新增烤炉"
+           :visible.sync="dialogVisible"
+           width="30%"
+           :before-close="handleClose">
+    <el-form ref="ed_form" :model="ed_form" label-width="80px">
+        <el-form-item label="烤炉名">
+            <el-input v-model="ed_form.oven_name"></el-input>
+        </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+        <el-button v-on:click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" v-on:click="addTab(ed_form.oven_name)">确 定</el-button>
+    </span>
+</el-dialog>
+
+
+@section Scripts
+{
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    form: {
+                        //oven_name: 'oven_name',
+                        //oven_enable: false,
+                        //upper_limit: 5,
+                        //lower_limit: 5,
+                        //compensate_p1: 1,
+                        //compensate_p2: 1,
+                        //compensate_p3: 1,
+                        //compensate_p4: 1,
+                        //compensate_p5: 1,
+                        //compensate_p6: 1,
+
+                        //collector_frequency: 1,
+                        //collector_port: 1,
+                        //collector_baud_rate: 9600,
+                        //collector_data_bit: 8,
+                        //collector_stop_bit: 1,
+                        //collector_parity: 1,
+                        //collector_duplex: 1,
+
+                        //thermostat_port: 1,
+                        //thermostat_baud_rate: 9600,
+                        //thermostat_data_bit: 8,
+                        //thermostat_stop_bit: 1,
+                        //thermostat_parity: 1,
+                        //thermostat_duplex: 1,
+
+
+                    },
+                    dialogVisible: false,
+                    ed_form: {
+                        oven_name: '',
+                    },
+
+                    editableTabsValue: '2',
+                    editableTabs: [
+                        //{
+                        //    key:1,
+                        //    title: '烤箱1',
+                        //    name: '1',
+                        //    content: 'Tab 1 content'
+                        //}
+                    ],
+                    duplex_item: [
+                        {
+                            value: 0,
+                            label: 'None' 
+                        },
+                        {
+                            value: 1,
+                            label: 'Simplex'
+                        },
+                        {
+                            value: 2,
+                            label: 'Half_duplex'
+                        },
+                        {
+                            value: 3,
+                            label: 'Full_duplex'
+                        }
+                    ],
+                    parity_item: [
+                        {
+                            value: 0,
+                            label: 'None'
+                        },
+                        {
+                            value: 1,
+                            label: 'Odd'
+                        },
+                        {
+                            value: 2,
+                            label: 'Even'
+                        },
+                        {
+                            value: 3,
+                            label: 'Mark'
+                        },
+                        {
+                            value: 4,
+                            label: 'Space'
+                        }
+                    ],
+                }
+            },
+            mounted() {
+                this.GetTabs();
+            },
+            methods: {
+                GetTabs() {
+                    axios.get("/OvenSystemConfig/GetOvenInfo").then(re => {
+                        var res = re.data;
+                        for (var i = 0; i < res.length; i++) {
+                            let tab = {
+                                key: res[i].id,
+                                title: res[i].oven_name,
+                                name: res[i].oven_name,
+                                content: 'Tab 1 content'
+                            }
+                            this.editableTabs.push(tab);
+                        }
+                    })
+                },
+                addTab(targetName) {
+                    axios.get("/OvenSystemConfig/AddOvenInfo?oven_name=" + targetName).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '添加成功',
+                                type: 'success'
+                            })
+                            let newTabName = ++this.tabIndex + '';
+                            this.editableTabs.push({
+                                title: targetName,
+                                name: targetName,
+                                content: 'New Tab content'
+                            });
+                            this.editableTabsValue = newTabName;
+                            this.dialogVisible = false;
+                        }
+                        else {
+                            this.$message.error('添加失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('添加失败');
+                    });
+                },
+                UpdateOvenInfo() {
+                    axios.post("/OvenSystemConfig/UpdateOvenInfo", this.form).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '更新成功',
+                                type: 'success'
+                            })
+                        }
+                        else {
+                            this.$message.error('更新失败');
+                        }
+                    }).catch(error => {
+                        this.$message.error('更新失败');
+                    });
+                },
+                removeTab() {
+                    axios.get("/OvenSystemConfig/DeleteOvenInfo?oven_name=" + this.form.oven_name).then(re => {
+                        if (re.data) {
+                            this.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            })
+                            let tabs = this.editableTabs;
+                            let activeName = this.editableTabsValue;
+                            if (activeName === this.form.oven_name) {
+                                tabs.forEach((tab, index) => {
+                                    if (tab.name === this.form.oven_name) {
+                                        let nextTab = tabs[index + 1] || tabs[index - 1];
+                                        if (nextTab) {
+                                            activeName = nextTab.name;
+                                        }
+                                    }
+                                });
+                            }
+                            this.editableTabsValue = activeName;
+                            this.editableTabs = tabs.filter(tab => tab.name !== this.form.oven_name);
+                        }
+                    }).catch(error => {
+                        this.$message.error('删除失败');
+                    });
+                },
+                handleClick(tab, event) {
+                    console.log(tab, event);
+                    axios.get("/OvenSystemConfig/GetOvenInfoByName?oven_name=" + tab.name).then(res => {
+                        this.form = res.data;
+                    }).catch(error => {
+                        this.$message.error('修改失败');
+                    });
+                }
+                
+            }
+        })
+    </script>
+}

@@ -117,15 +117,7 @@ else
             <div style="position: absolute;top: 5px;right: 20px">
                 <el-dropdown v-on:command="CommandHandler">
                     <span class="el-dropdown-link">
-                        @if (string.IsNullOrEmpty(ViewData["Avatar"]?.ToString()))
-                        {
-                            <el-avatar src="/img/user.png"></el-avatar>
-                        }
-                        else
-                        {
-                            <el-avatar src="@ViewData["Avatar"]"></el-avatar>
-                        }
-
+                        <el-avatar src="/img/user.png"></el-avatar>
                     </span>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item disabled>@Model.user_name</el-dropdown-item>
@@ -142,27 +134,41 @@ else
                     <el-menu style="height: 100%"
                              v-on:select="SelectMenuItem"
                              class="el-menu-vertical-demo">
-                            <el-submenu index="1">
-                                <template slot="title">
-                                    <i class="el-icon-setting"></i>
-                                    <span>@Localizer["烤箱参数设定"]</span>
-                                </template>
-                                <el-menu-item v-for="item in SetMenuItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
-                            </el-submenu>
-                            <el-submenu index="2">
-                                <template slot="title">
-                                    <i class="el-icon-tickets"></i>
-                                    <span>@Localizer["烤箱数据"]</span>
-                                </template>
-                                <el-menu-item v-for="item in WorkItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
-                            </el-submenu>
-                            <el-submenu index="3">
-                                <template slot="title">
-                                    <i class="el-icon-tickets"></i>
-                                    <span>@Localizer["用户管理"]</span>
-                                </template>
-                                <el-menu-item v-for="item in UserItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
-                            </el-submenu>
+                        <el-submenu index="1">
+                            <template slot="title">
+                                <i class="el-icon-setting"></i>
+                                <span>@Localizer["烤箱参数设定"]</span>
+                            </template>
+                            <el-menu-item v-for="item in SetMenuItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2">
+                            <template slot="title">
+                                <i class="el-icon-setting"></i>
+                                <span>@Localizer["专案管理"]</span>
+                            </template>
+                            <el-menu-item v-for="item in ProjectItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="3">
+                            <template slot="title">
+                                <i class="el-icon-tickets"></i>
+                                <span>@Localizer["烤箱数据"]</span>
+                            </template>
+                            <el-menu-item v-for="item in WorkItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="4">
+                            <template slot="title">
+                                <i class="el-icon-tickets"></i>
+                                <span>@Localizer["报警信息"]</span>
+                            </template>
+                            <el-menu-item v-for="item in AlarmItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="5">
+                            <template slot="title">
+                                <i class="el-icon-tickets"></i>
+                                <span>@Localizer["用户管理"]</span>
+                            </template>
+                            <el-menu-item v-for="item in UserItems" :index="item.url" v-if="CheckRole(Roles,item.role)">{{item.title}}</el-menu-item>
+                        </el-submenu>
                     </el-menu>
                 </el-scrollbar>
                 <el-button style="position: absolute;top: 50%;left:170px" icon="el-icon-back" circle size="mini" type="primary" v-on:click="Hidden"></el-button>
@@ -174,12 +180,13 @@ else
                         <div style="width: 100%;height: 100%;" class="welcome"></div>
                     </el-tab-pane>
                     <el-tab-pane v-for="item in Tabs" :key="item.name" :name="item.name" :label="item.title" closable style="height: 100%">
-                        <iframe style="width: 100%;height: 100%;border: none" :src="item.url"></iframe>
+                        <iframe style="width: 100%;height: 100%;border: none;margin-top:20px" :src="item.url"></iframe>
                     </el-tab-pane>
                 </el-tabs>
             </div>
         </div>
     </div>
+    <br>
 }
 @* 弹窗 *@
 <el-dialog title="修改密码"
@@ -196,7 +203,7 @@ else
     </el-form>
     <span slot="footer" class="dialog-footer">
         <el-button v-on:click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary"  v-on:click="changePasswordForm(form)">确 定</el-button>
+        <el-button type="primary" v-on:click="changePasswordForm(form)">确 定</el-button>
     </span>
 </el-dialog>
 
@@ -225,60 +232,26 @@ else
                             role: "User Management",
                             name: "20"
                         },
+                        //{
+                        //    url: "/OvenConfig/Index",
+                        //    title: "烤箱设定",
+                        //    role: "设备管理",
+                        //    name: "1"
+                        //},
                         {
-                            url: "/Config/DistrictInfo",
-                            title: "区域信息",
-                            role: "设备管理",
-                            name: "1"
-                        },
-                        {
-                            url: "/Config/Position",
-                            title: "位置信息",
+                            url: "/OvenSystemConfig/Index",
+                            title: "系统设定",
                             role: "设备管理",
                             name: "2"
-                        },
+                        }
+                    ],
+                    ProjectItems: [
                         {
-                            url: "/Config/Shelf",
-                            title: "货架信息",
+                            url: "/Project/Index",
+                            title: "创建项目",
                             role: "设备管理",
                             name: "3"
-                        },
-                        {
-                            url: "/Config/Locker",
-                            title: "储柜信息",
-                            role: "设备管理",
-                            name: "4"
-                        },
-                        {
-                            url: "/Config/ErrorCode",
-                            title: "不良代码",
-                            role: "设备管理",
-                            name: "5"
-                        },
-                        {
-                            url: "/Config/ErrorReason",
-                            title: "不良原因",
-                            role: "设备管理",
-                            name: "6"
-                        },
-                        {
-                            url: "/Config/Status",
-                            title: "设备状态",
-                            role: "设备管理",
-                            name: "7"
-                        },
-                        {
-                            url: "/Config/Style",
-                            title: "设备类型",
-                            role: "设备管理",
-                            name: "8"
-                        },
-                        {
-                            url: "/Config/Machine",
-                            title: "设备信息",
-                            role: "设备管理",
-                            name: "9"
-                        },
+                        }
                     ],
                     WorkItems: [
                         {
@@ -289,7 +262,7 @@ else
                         },
                         {
                             url: "/TemperatureMonitor/Index",
-                            title: "实时温度曲线",
+                            title: "实时温度",
                             role: "设备管理",
                             name: "31"
                         },
@@ -299,6 +272,14 @@ else
                             role: "设备管理",
                             name: "32"
                         },
+                    ],
+                    AlarmItems: [
+                        {
+                            url: "/MailServer/Index",
+                            title:"邮件通知设定",
+                            role: "设备管理",
+                            name: "20"
+                        }
                     ],
                     UserItems: [
                         {
@@ -337,6 +318,12 @@ else
                     }
                     if (!item) {
                         item = _.find(this.WorkItems, item => { return item.url === index });
+                    }
+                    if (!item) {
+                        item = _.find(this.AlarmItems, item => { return item.url === index });
+                    }
+                    if (!item) {
+                        item = _.find(this.ProjectItems, item => { return item.url === index });
                     }
                     if (item) {
                         this.handleTabsEdit(item, "add");
@@ -443,6 +430,13 @@ else
                             message: "请检查账号密码"
                         });
                     });
+                },
+                handleClose(done) {
+                    this.$confirm('确认关闭？')
+                        .then(_ => {
+                            done();
+                        })
+                        .catch(_ => { });
                 }
             }
         });
